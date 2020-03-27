@@ -6,11 +6,21 @@ void blurKernel(unsigned char* Pout, unsigned char* Pin,
     int Row = threadIdx.y + blockIdx.y * blockDim.y; 
     if (Col < width && Row < height)
     {
-        int greyOffset = Row * width + Col;
-        int rgbOffset = greyOffset * CHANNELS;
-        unsigned char r = Pin[rgbOffset    ]; 
-        unsigned char g = Pin[rgbOffset + 1]; 
-        unsigned char b = Pin[rgbOffset + 2];
-        Pout[greyOffset] = 0.21f*r + 0.71f*g + 0.07f*b;
+        int pixVal = 0;
+        int pixels = 0;
+        for(int blurRow=-BLUR_SIZE; blurRow <= BLUR_SIZE; blurRow++) 
+            for(int blurCol=-BLUR_SIZE; blurCol <= BLUR_SIZE; blurCol++) 
+        {
+            {
+                int curRow = Row + blurRow; 
+                int curCol = Col + blurCol; 
+                if(curRow >= 0 && curRow < height && curCol >= 0 && curCol < width)
+                {
+                    pixVal += Pin[curRow*width + curCol]; 
+                    pixels += 1 
+                }
+            }
+        }
+        Pout[Row*width + Col] = (unsigned char)(pixVal / pixels);
     }
 }
